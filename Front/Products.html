@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prueba API FERREMAS - Productos</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, button { padding: 5px; margin-top: 5px; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #eee; }
+    tr:hover { background: #f9f9f9; }
+  </style>
+</head>
+<body>
+
+  <h1>Gestión de Productos - FERREMAS</h1>
+
+  <form id="formProducto">
+    <label>Código: <input type="text" id="codigo" required /></label>
+    <label>Marca: <input type="text" id="marca" required /></label>
+    <label>Nombre: <input type="text" id="nombre" required /></label>
+    <label>Modelo: <input type="text" id="modelo" required /></label>
+    <label>Stock: <input type="number" id="stock" required min="0" /></label>
+    <button type="submit">Guardar / Actualizar</button>
+  </form>
+
+  <table id="tablaProductos">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Marca</th>
+        <th>Nombre</th>
+        <th>Modelo</th>
+        <th>Stock</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+  const apiUrl = 'http://localhost:8000/productos';
+
+  async function listarProductos() {
+    const res = await fetch(apiUrl);
+    const productos = await res.json();
+    const tbody = document.querySelector('#tablaProductos tbody');
+    tbody.innerHTML = '';
+    productos.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.codigo}</td>
+        <td>${p.marca}</td>
+        <td>${p.nombre}</td>
+        <td>${p.modelo}</td>
+        <td>${p.stock}</td>
+        <td>
+          <button onclick="editarProducto('${p.codigo}')">Editar</button>
+          <button onclick="eliminarProducto('${p.codigo}')">Eliminar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function agregarProducto(producto) {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(producto)
+    });
+    if (!res.ok) {
+      alert('Error al agregar producto: ' + (await res.text()));
+    }
+  }
+
+  async function actualizarProducto(codigo, producto) {
+    const res = await fetch(`${apiUrl}/${codigo}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(producto)
+    });
+    if (!res.ok) {
+      alert('Error al actualizar producto: ' + (await res.text()));
+    }
+  }
+
+  async function eliminarProducto(codigo) {
+    if (!confirm(`¿Eliminar producto con código "${codigo}"?`)) return;
+    const res = await fetch(`${apiUrl}/${codigo}`, { method: 'DELETE' });
+    if (res.status !== 204) {
+      alert('Error al eliminar producto');
+    } else {
+      listarProductos();
+    }
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('formProducto').reset();
+  }
+
+  async function editarProducto(codigo) {
+    const res = await fetch(`${apiUrl}/${codigo}`);
+    if (res.ok) {
+      const p = await res.json();
+      document.getElementById('codigo').value = p.codigo;
+      document.getElementById('marca').value = p.marca;
+      document.getElementById('nombre').value = p.nombre;
+      document.getElementById('modelo').value = p.modelo;
+      document.getElementById('stock').value = p.stock;
+      document.getElementById('codigo').disabled = true; 
+    } else {
+      alert('Producto no encontrado');
+    }
+  }
+
+  document.getElementById('formProducto').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const codigo = document.getElementById('codigo').value.trim();
+    const producto = {
+      codigo,
+      marca: document.getElementById('marca').value.trim(),
+      nombre: document.getElementById('nombre').value.trim(),
+      modelo: document.getElementById('modelo').value.trim(),
+      stock: parseInt(document.getElementById('stock').value),
+    };
+    if (document.getElementById('codigo').disabled) {
+      // Pa editarlos
+      await actualizarProducto(codigo, producto);
+      document.getElementById('codigo').disabled = false;
+    } else {
+      // Pa agregar productos
+      await agregarProducto(producto);
+    }
+    limpiarFormulario();
+    listarProductos();
+  });
+
+  listarProductos();
+</script>
+
+<form action="http://localhost:8000/pagar" method="post">
+    <button type="submit">Pagar con Webpay (No implementado)</button>
+</form>
+
+
+</body>
+</html>

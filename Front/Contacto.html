@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulario de Contacto - FERREMAS</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, textarea, button { width: 100%; padding: 8px; margin-top: 5px; }
+    textarea { resize: vertical; height: 100px; }
+  </style>
+</head>
+<body>
+
+  <h1>Formulario de Contacto</h1>
+
+  <form id="formContacto">
+    <label>Nombre:
+      <input type="text" id="nombre" required />
+    </label>
+    <label>Correo:
+      <input type="email" id="correo" required />
+    </label>
+    <label>Asunto:
+      <input type="text" id="asunto" required />
+    </label>
+    <label>Mensaje:
+      <textarea id="mensaje" required></textarea>
+    </label>
+    <button type="submit">Enviar</button>
+  </form>
+  
+  <script>
+    const data = {
+      nombre: document.getElementById('nombre').value.trim(),
+      correo: document.getElementById('correo').value.trim(),
+      asunto: document.getElementById('asunto').value.trim(),
+      mensaje: document.getElementById('mensaje').value.trim(),
+    };
+  </script>
+  
+
+</body>
+</html>
